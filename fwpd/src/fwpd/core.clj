@@ -33,4 +33,29 @@
 
 (defn glitter-filter
   [minimum-glitter records]
-  (filter #(>= (:glitter-index %) minimum-glitter) records))
+  (map :name (filter #(>= (:glitter-index %) minimum-glitter) records)))
+
+(def validations {:name string?
+                  :glitter-index int?})
+
+(defn validate
+  "validates a vampire record"
+  [record]
+  (every? (fn [[vamp-key value]]  ((get validations vamp-key) value)) record))
+
+(defn to-record [[name glitter-index]] {:name name
+                                        :glitter-index glitter-index})
+
+(defn append
+  "append new suspect to list of suspects"
+  [records r]
+  (if (validate r)
+    (conj records r)
+    records))
+
+(defn to-csv
+  "takes a list of records and returns a csv string representation of it's values"
+  [records]
+  (clojure.string/join "\n"
+                       (map #((partial clojure.string/join ",")
+                                  (map second %)) records)))
